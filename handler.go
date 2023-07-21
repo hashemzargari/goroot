@@ -2,6 +2,10 @@ package goroot
 
 type ApiHttpMethod string
 
+func (m ApiHttpMethod) String() string {
+	return string(m)
+}
+
 const (
 	Get    ApiHttpMethod = "GET"
 	Post   ApiHttpMethod = "POST"
