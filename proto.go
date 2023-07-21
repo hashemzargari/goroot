@@ -12,13 +12,19 @@ import (
 const protoTemplate = `
 syntax = "proto3";
 
-{{ range $struct := . }}
+{{ range $struct := .Types }}
 message {{ getTypeName $struct }} {
 	{{ range $fieldIndex, $field := getFieldNamesAndTypes $struct }}
 	{{ $field.Name }} {{ convertType $field.Type }} = {{ $field.Index }};
 	{{ end }}
 }
 {{ end }}
+
+service {{ .ServiceName }} {
+	{{ range $handler := .Handlers }}
+	rpc {{ getHandlerName $handler }} ({{ getHandlerRequestType $handler }}) returns ({{ getHandlerResponseType $handler }});
+	{{ end }}
+}
 
 `
 
@@ -106,15 +112,26 @@ func mustIgnoreStruct(t reflect.Type) bool {
 }
 
 // GenerateProtoContent Generate the proto content using the template and reflection.
-func GenerateProtoContent(structs []interface{}) (string, error) {
+func GenerateProtoContent(serviceName string, handlers []Handler, allTypes []interface{}) (string, error) {
 	tmpl := template.Must(template.New("protoTemplate").Funcs(template.FuncMap{
-		"getTypeName":           getTypeName,
-		"getFieldNamesAndTypes": getFieldNamesAndTypes,
-		"convertType":           convertType,
+		"getTypeName":            getTypeName,
+		"getFieldNamesAndTypes":  getFieldNamesAndTypes,
+		"convertType":            convertType,
+		"getHandlerName":         getHandlerName,
+		"getHandlerRequestType":  getHandlerRequestType,
+		"getHandlerResponseType": getHandlerResponseType,
 	}).Parse(protoTemplate))
 
 	var generatedContent bytes.Buffer
-	if err := tmpl.Execute(&generatedContent, structs); err != nil {
+	if err := tmpl.Execute(&generatedContent, struct {
+		Types       []interface{}
+		ServiceName string
+		Handlers    []Handler
+	}{
+		Types:       allTypes,
+		ServiceName: serviceName,
+		Handlers:    handlers,
+	}); err != nil {
 		return "", err
 	}
 
@@ -222,4 +239,16 @@ func convertType(goType reflect.Type) string {
 	default:
 		return goType.Name()
 	}
+}
+
+func getHandlerName(handler Handler) string {
+	return getTypeName(handler)
+}
+
+func getHandlerRequestType(handler Handler) string {
+	return getTypeName(handler.GetRequestType())
+}
+
+func getHandlerResponseType(handler Handler) string {
+	return getTypeName(handler.GetResponseType())
 }
