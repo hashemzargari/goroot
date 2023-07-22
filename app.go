@@ -1,6 +1,9 @@
 package goroot
 
 import (
+	"fmt"
+	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -51,7 +54,14 @@ func (app *App) Run(grpcAddress string) error {
 	}
 
 	// generate grpc
-	err = writeToFile(strings.ReplaceAll(strings.ToLower(app.GetName()), " ", "_")+".proto", protoContent)
+	protoFileName := strings.ReplaceAll(strings.ToLower(app.GetName()), " ", "_") + ".proto"
+	err = writeToFile(protoFileName, protoContent)
+	if err != nil {
+		return err
+	}
+
+	// compile proto to go
+	err = compileProtoToGo(protoFileName)
 	if err != nil {
 		return err
 	}
@@ -60,6 +70,32 @@ func (app *App) Run(grpcAddress string) error {
 	// register handlers to grpc server
 	// start grpc server
 	// TODO
+	return nil
+}
+
+// compileProtoToGo compiles a .proto file to go files
+func compileProtoToGo(name string) error {
+	// Get the absolute path of the .proto file.
+	absPath, err := filepath.Abs(name)
+	if err != nil {
+		return err
+	}
+
+	// Check if the .proto file exists.
+	if _, err := os.Stat(absPath); os.IsNotExist(err) {
+		return fmt.Errorf("file not found: %s", absPath)
+	}
+
+	// Prepare the protoc command.
+	cmd := exec.Command("protoc", fmt.Sprintf("--go-grpc_out=. --go_out=. ./%s.proto", absPath))
+
+	// Run the protoc command and capture the output and error streams.
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("error compiling .proto file: %s", err.Error())
+	}
+
+	fmt.Printf("Compilation output:\n%s\n", output)
 	return nil
 }
 
