@@ -16,13 +16,13 @@ const (
 
 type Handler interface {
 	// Handle is the main method of the handler
-	Handle(ctx Context, req interface{}) (interface{}, error)
+	Handle(ctx Context, request any) (response any, err error)
 
 	// GetRequestType returns the type of the request
-	GetRequestType() interface{}
+	GetRequestType() any
 
 	// GetResponseType returns the type of the response
-	GetResponseType() interface{}
+	GetResponseType() any
 
 	// GetPermissionClaims returns the permission claims required to execute the handler
 	GetPermissionClaims() []PermissionClaim

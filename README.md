@@ -21,24 +21,24 @@ type SumNumbersResponse struct {
 	Result int `json:"result"`
 }
 
-type SumHandler struct {}
+type SumHandler struct{}
 
-func (h SumHandler) Handle(request any) (any, error) {
-	request := request.(SumNumbersRequest)
+func (h SumHandler) Handle(ctx goroot.Context, request any) (any, error) {
+	req := request.(SumNumbersRequest)
 
 	result := 0
-	for _, number := range request.Numbers {
+	for _, number := range req.Numbers {
 		result += number
 	}
 
 	return SumNumbersResponse{Result: result}, nil
 }
 
-func (h SumHandler) GetRequestType() interface{} {
+func (h SumHandler) GetRequestType() any {
 	return SumNumbersRequest{}
 }
 
-func (h SumHandler) GetResponseType() interface{} {
+func (h SumHandler) GetResponseType() any {
 	return SumNumbersResponse{}
 }
 
