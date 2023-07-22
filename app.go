@@ -29,6 +29,7 @@ func (app App) Run(grpcAddress string) error {
 	// register handlers to grpc server
 	// start grpc server
 	// TODO
+	return nil
 }
 
 func inArray(h Handler, handlers []Handler) bool {
