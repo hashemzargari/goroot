@@ -52,6 +52,7 @@ service {{ .ServiceName }} {
 
 `
 
+// extractStructsFromFields extracts all structs from a given type
 func extractStructsFromFields(t reflect.Type) []any {
 	structs := make([]any, 0)
 	if t.Kind() != reflect.Struct {
@@ -89,6 +90,7 @@ func extractStructsFromFields(t reflect.Type) []any {
 	return structs
 }
 
+// isStructInSlice checks if a given struct is in a slice of structs
 func isStructInSlice(t reflect.Type, structs []interface{}) bool {
 	for _, s := range structs {
 		if reflect.TypeOf(s) == t {
@@ -98,6 +100,7 @@ func isStructInSlice(t reflect.Type, structs []interface{}) bool {
 	return false
 }
 
+// ExtractAllStructsFromHandlers extracts all structs from a slice of handlers
 func ExtractAllStructsFromHandlers(handlers []Handler) []any {
 	var structs []any
 	for _, handler := range handlers {
@@ -126,6 +129,7 @@ func ExtractAllStructsFromHandlers(handlers []Handler) []any {
 	return structs
 }
 
+// mustIgnoreStruct checks if a struct must be ignored in the proto generation.
 func mustIgnoreStruct(t reflect.Type) bool {
 	switch t.Name() {
 	case "Time", "Duration":
@@ -194,6 +198,8 @@ func writeToFile(fileName, content string) error {
 }
 
 // Helper functions for reflection.
+
+// getTypeName returns the name of the type.
 func getTypeName(i interface{}) string {
 	reflectType := reflect.TypeOf(i)
 	if reflectType.Kind() == reflect.Array || reflectType.Kind() == reflect.Slice {
@@ -205,6 +211,7 @@ func getTypeName(i interface{}) string {
 	return reflectType.Name()
 }
 
+// getFieldNamesAndTypes returns the name and type of the fields of the struct.
 func getFieldNamesAndTypes(i interface{}) []struct {
 	Name  string
 	Type  reflect.Type
@@ -232,6 +239,7 @@ func getFieldNamesAndTypes(i interface{}) []struct {
 	return fields
 }
 
+// convertType converts the go type to proto type.
 func convertType(goType reflect.Type) string {
 
 	if goType.Kind() == reflect.Array || goType.Kind() == reflect.Slice {
@@ -280,22 +288,27 @@ func convertType(goType reflect.Type) string {
 	}
 }
 
+// getHandlerName returns the name of the handler.
 func getHandlerName(handler Handler) string {
 	return getTypeName(handler)
 }
 
+// getHandlerRequestType returns the name of the request type of the handler.
 func getHandlerRequestType(handler Handler) string {
 	return getTypeName(handler.GetRequestType())
 }
 
+// getHandlerResponseType returns the name of the response type of the handler.
 func getHandlerResponseType(handler Handler) string {
 	return getTypeName(handler.GetResponseType())
 }
 
+// getHandlerMethod returns the method of the handler.
 func getHandlerMethod(handler Handler) string {
 	return strings.ToLower(handler.GetMethod().String())
 }
 
+// getHandlerApiRoute returns the api route of the handler.
 func getHandlerApiRoute(handler Handler) string {
 	return strings.ToLower(handler.GetApiRoute())
 }
