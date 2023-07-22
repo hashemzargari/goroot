@@ -33,7 +33,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 {{ range $struct := .Types }}
 message {{ getTypeName $struct }} {
 	{{ range $fieldIndex, $field := getFieldNamesAndTypes $struct }}
-	{{ $field.Name }} {{ convertType $field.Type }} = {{ $field.Index }};
+	{{ convertType $field.Type }} {{ $field.Name }} = {{ $field.Index }};
 	{{ end }}
 }
 {{ end }}

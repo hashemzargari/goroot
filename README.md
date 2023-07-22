@@ -64,9 +64,12 @@ func (h SumHandler) GetMethod() goroot.ApiHttpMethod {
 
 ```go
 func main() {
-    app := goroot.New("MyService")
-    app.RegisterHandlers(SumHandler{})
-    app.Run(":8080")
+    app := goroot.NewApp("MyService", uint(1))
+    _ = app.RegisterHandlers(SumHandler{})
+    err := app.Run(":9002")
+    if err != nil {
+    panic(err)
+    }
 }
 ```
 
@@ -77,14 +80,14 @@ GoRoot generate a proto file based on your handlers and use google.api.http anno
 
 syntax = "proto3";
 
-package api.proto.MyService.v1;
+package goroot.MyService.v1;
 
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
-option go_package = "github.com/MyService/api/proto/MyService/v1;v1";
+option go_package = "goroot/MyService/v1;v1";
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
     title: "MyService";
@@ -93,28 +96,31 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 
+
 message SumNumbersRequest {
-        
-        Numbers repeated int32 = 1;
-        
+
+  repeated int32 Numbers = 1;
+
 }
 
 message SumNumbersResponse {
-        
-        Result int32 = 1;
-        
+
+  int32 Result = 1;
+
 }
 
 
 service MyService {
-        
-        rpc SumHandler (SumNumbersRequest) returns (SumNumbersResponse) {
-                option (google.api.http) = {
-                        post: "/sum-numbers";   
-                        body: "*";
-                };
-        }
-        
+
+  rpc SumHandler (SumNumbersRequest) returns (SumNumbersResponse) {
+    option (google.api.http) = {
+      post: "/sum-numbers";
+      body: "*";
+    };
+  }
+
 }
+
+
 ```
 
